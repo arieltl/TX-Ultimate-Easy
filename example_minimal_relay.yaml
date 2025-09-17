@@ -1,0 +1,38 @@
+# Minimal Example: TX Ultimate Easy with Relay Control
+# This example shows the simplest possible setup:
+# - Button 1 press toggles Relay 1
+# - No extra devices or complexity
+# - Just the essential touch-to-relay functionality
+
+packages:
+  tx_ultimate_easy_minimal:
+    url: https://github.com/aieltl/TX-Ultimate-Easy
+    ref: main
+    refresh: 5min
+    files:
+      - ESPHome/TX-Ultimate-Easy-ESPHome_minimal.yaml
+
+# Device configuration
+substitutions:
+  name: tx-minimal-relay
+  friendly_name: TX Minimal Relay
+  gang_count: '3'  # This will enable Relay 1 and Relay 2 in Home Assistant
+  model_format: 'US'
+
+# Use the built-in relays from the minimal component
+# No need to define switches - they're already in the component
+
+# Override only the touch press handler to control the relay
+# All other handlers will use the default behavior (just logging)
+script:
+  - id: on_touch_press_custom
+    mode: restart
+    then:
+      - lambda: |-
+          ESP_LOGI("minimal", "Button %d pressed at position %d", touch.button, touch.x);
+          if (touch.button == 1) {
+            ESP_LOGI("minimal", "Toggling Relay 1");
+            output_relay_1->toggle();
+          } else {
+            ESP_LOGI("minimal", "Button %d not configured", touch.button);
+          }

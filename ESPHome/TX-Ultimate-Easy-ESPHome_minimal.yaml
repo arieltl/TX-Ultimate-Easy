@@ -1,0 +1,267 @@
+####################################################################################################
+#####                              TX Ultimate Easy for ESPHome                                #####
+#####                  Repository: https://github.com/edwardtfn/TX-Ultimate-Easy               #####
+####################################################################################################
+##### Purpose: ESPHome Minimal - Events with Custom Script Hooks                                #####
+####################################################################################################
+##### Author: edwardtfn - https://github.com/edwardtfn - https://buymeacoffee.com/edwardfirmo  #####
+####################################################################################################
+##### NOTE:                                                                                    #####
+##### - This version allows device YAML to define custom scripts that get called on touch events #####
+##### - No configuration entities are exposed to Home Assistant                               #####
+##### - No automatic relay triggering - all actions must be defined in device YAML            #####
+##### - Configuration is done via ESPHome substitutions in device YAML                        #####
+####################################################################################################
+---
+substitutions:
+  name: tx-ultimate-easy
+  friendly_name: TX Ultimate Easy
+  
+  # Configuration - Set these in your device YAML
+  gang_count: '1'  # Number of buttons (1-4)
+  model_format: 'EU'  # 'EU' or 'US' - affects swipe direction mapping
+  
+  # Version info
+  version: '2024.12.1'
+  
+  # Event name for Home Assistant
+  EVENT_NAME: esphome.tx_ultimate_easy
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  comment: TX Ultimate Easy - Minimal Events Only
+  project:
+    name: "edwardtfn.tx_ultimate_easy"
+    version: ${version}
+  platformio_options:
+    build_flags:
+      - -D TX_ULTIMATE_EASY_MINIMAL
+  on_boot:
+    - priority: 700
+      then:
+        - lambda: |-
+            ESP_LOGI("minimal", "TX Ultimate Easy Minimal - Starting up");
+            ESP_LOGI("minimal", "Gang count: ${gang_count}");
+            ESP_LOGI("minimal", "Model format: ${model_format}");
+            // Initialize touch panel
+            sw_touch_panel_power->turn_on();
+            // Set gang count
+            tx_ultimate->set_gang_count(${gang_count});
+            // Initialize relays based on gang count
+            script.execute: initialize_relays;
+
+esp32:
+  board: esp32dev
+  flash_size: 8MB
+  framework:
+    type: esp-idf
+
+wifi:
+  id: wifi_component
+
+api:
+  id: api_server
+
+ota:
+  platform: esphome
+
+logger:
+  level: INFO
+
+# External component - the C++ touch handler
+external_components:
+  - source:
+      type: git
+      url: https://github.com/edwardtfn/TX-Ultimate-Easy
+      ref: v${version}
+    refresh: 1h
+    components:
+      - tx_ultimate_easy
+
+# UART communication with touch controller
+uart:
+  - id: uart_touch
+    tx_pin: GPIO19
+    rx_pin: GPIO22
+    baud_rate: 115200
+
+# Touch panel power control and relays
+switch:
+  - id: sw_touch_panel_power
+    name: Touch panel - Power
+    platform: gpio
+    pin:
+      number: GPIO5
+      inverted: true
+    restore_mode: ALWAYS_ON
+    internal: true  # Hide from Home Assistant
+
+  # Hardware relays (commercial device pins)
+  # These will be enabled/disabled based on gang_count during boot
+  - id: output_relay_1
+    name: "Relay 1"
+    platform: gpio
+    pin: GPIO18
+    restore_mode: RESTORE_DEFAULT_OFF
+    internal: true  # Will be set to false for enabled relays during boot
+
+  - id: output_relay_2
+    name: "Relay 2"
+    platform: gpio
+    pin: GPIO17
+    restore_mode: RESTORE_DEFAULT_OFF
+    internal: true  # Will be set to false for enabled relays during boot
+
+  - id: output_relay_3
+    name: "Relay 3"
+    platform: gpio
+    pin: GPIO27
+    restore_mode: RESTORE_DEFAULT_OFF
+    internal: true  # Will be set to false for enabled relays during boot
+
+  - id: output_relay_4
+    name: "Relay 4"
+    platform: gpio
+    pin: GPIO23
+    restore_mode: RESTORE_DEFAULT_OFF
+    internal: true  # Will be set to false for enabled relays during boot
+
+# Placeholder scripts that can be overridden in device YAML
+script:
+  - id: initialize_relays
+    mode: restart
+    then:
+      - lambda: |-
+          uint8_t gang_count = ${gang_count};
+          ESP_LOGI("minimal", "Initializing %d relay(s) based on gang count", gang_count);
+          
+          // Enable relays based on gang count
+          if (gang_count >= 1) {
+            output_relay_1->set_internal(false);
+            ESP_LOGI("minimal", "Relay 1 enabled");
+          }
+          if (gang_count >= 2) {
+            output_relay_2->set_internal(false);
+            ESP_LOGI("minimal", "Relay 2 enabled");
+          }
+          if (gang_count >= 3) {
+            output_relay_3->set_internal(false);
+            ESP_LOGI("minimal", "Relay 3 enabled");
+          }
+          if (gang_count >= 4) {
+            output_relay_4->set_internal(false);
+            ESP_LOGI("minimal", "Relay 4 enabled");
+          }
+
+  - id: on_touch_press_custom
+    mode: restart
+    then:
+      - lambda: |-
+          ESP_LOGI("minimal", "Touch pressed - Button: %d, Position: %d (default handler)", touch.button, touch.x);
+
+  - id: on_touch_release_custom
+    mode: restart
+    then:
+      - lambda: |-
+          ESP_LOGI("minimal", "Touch released - Button: %d, Position: %d (default handler)", touch.button, touch.x);
+
+  - id: on_long_touch_release_custom
+    mode: restart
+    then:
+      - lambda: |-
+          ESP_LOGI("minimal", "Long touch released - Button: %d, Position: %d (default handler)", touch.button, touch.x);
+
+  - id: on_swipe_left_custom
+    mode: restart
+    then:
+      - lambda: |-
+          ESP_LOGI("minimal", "Swipe left detected - Position: %d (default handler)", touch.x);
+
+  - id: on_swipe_right_custom
+    mode: restart
+    then:
+      - lambda: |-
+          ESP_LOGI("minimal", "Swipe right detected - Position: %d (default handler)", touch.x);
+
+  - id: on_multi_touch_release_custom
+    mode: restart
+    then:
+      - lambda: |-
+          ESP_LOGI("minimal", "Multi-touch released - Position: %d (default handler)", touch.x);
+
+# Main touch component - this is where the magic happens
+tx_ultimate_easy:
+  id: tx_ultimate
+  uart: uart_touch
+  
+  # Configure gang count from substitution
+  gang_count: !lambda |-
+    uint8_t count = ${gang_count};
+    if (count < 1 || count > 4) {
+      ESP_LOGE("minimal", "Invalid gang count: %d, using 1", count);
+      return 1;
+    }
+    return count;
+
+  # Touch press event - calls custom script
+  on_press:
+    then:
+      - script.execute: on_touch_press_custom
+
+  # Touch release event - calls custom script
+  on_release:
+    then:
+      - script.execute: on_touch_release_custom
+
+  # Long touch release event - calls custom script
+  on_long_touch_release:
+    then:
+      - script.execute: on_long_touch_release_custom
+
+  # Swipe left event - calls custom script
+  on_swipe_left:
+    then:
+      - script.execute: on_swipe_left_custom
+
+  # Swipe right event - calls custom script
+  on_swipe_right:
+    then:
+      - script.execute: on_swipe_right_custom
+
+  # Multi-touch event - calls custom script
+  on_multi_touch_release:
+    then:
+      - script.execute: on_multi_touch_release_custom
+
+  # Generic touch event - fires for all touch events (for debugging)
+  on_touch_event:
+    then:
+      - lambda: |-
+          ESP_LOGD("minimal", "Touch event - State: %s, Button: %d, Position: %d", 
+                   touch.state_str.c_str(), touch.button, touch.x);
+
+# Boot sequence is now handled in the main esphome section above
+
+# Optional: Send events to Home Assistant
+# Uncomment the sections below if you want to send events to Home Assistant
+
+# script:
+#   - id: send_ha_event
+#     mode: restart
+#     parameters:
+#       event_type: string
+#       data: string
+#     then:
+#       - homeassistant.event:
+#           event: ${EVENT_NAME}
+#           data: !lambda return data;
+
+# Then modify the custom scripts above to also call:
+# - script.execute:
+#     id: send_ha_event
+#     event_type: "touch_press"
+#     data: !lambda |-
+#       return "{\"button\":" + std::to_string(touch.button) + 
+#              ",\"position\":" + std::to_string(touch.x) + 
+#              ",\"state\":\"" + touch.state_str + "\"}";

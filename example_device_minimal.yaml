@@ -1,0 +1,169 @@
+# Example Device YAML using the minimal TX Ultimate Easy component
+# This shows how to override the default scripts with your custom logic
+
+packages:
+  tx_ultimate_easy_minimal:
+    url: https://github.com/edwardtfn/TX-Ultimate-Easy
+    ref: main
+    refresh: 5min
+    files:
+      - ESPHome/TX-Ultimate-Easy-ESPHome_minimal.yaml
+
+# Override the minimal component's substitutions with your configuration
+substitutions:
+  # Device identification
+  name: living-room-panel
+  friendly_name: Living Room Panel
+  
+  # TX Ultimate Easy configuration
+  gang_count: '2'  # Number of buttons (1-4)
+  model_format: 'EU'  # 'EU' or 'US' - affects swipe direction mapping
+  
+  # Optional: Customize event name
+  EVENT_NAME: esphome.living_room_panel
+
+# Your custom switches/relays
+switch:
+  - platform: gpio
+    pin: GPIO2
+    name: "Living Room Light"
+    id: living_room_light
+    restore_mode: RESTORE_DEFAULT_OFF
+
+  - platform: gpio  
+    pin: GPIO4
+    name: "Living Room Fan"
+    id: living_room_fan
+    restore_mode: RESTORE_DEFAULT_OFF
+
+# Override the default scripts with your custom logic
+script:
+  # Override touch press handler
+  - id: on_touch_press_custom
+    mode: restart
+    then:
+      - lambda: |-
+          ESP_LOGI("device", "Button %d pressed at position %d", touch.button, touch.x);
+          // Custom logic based on button number
+          switch (touch.button) {
+            case 1:
+              ESP_LOGI("device", "Toggling living room light");
+              living_room_light->toggle();
+              break;
+            case 2:
+              ESP_LOGI("device", "Toggling living room fan");
+              living_room_fan->toggle();
+              break;
+            default:
+              ESP_LOGI("device", "Button %d not configured", touch.button);
+              break;
+          }
+
+  # Override touch release handler
+  - id: on_touch_release_custom
+    mode: restart
+    then:
+      - lambda: |-
+          ESP_LOGI("device", "Button %d released at position %d", touch.button, touch.x);
+          // Add any release-specific logic here
+
+  # Override long touch release handler
+  - id: on_long_touch_release_custom
+    mode: restart
+    then:
+      - lambda: |-
+          ESP_LOGI("device", "Long press on button %d at position %d", touch.button, touch.x);
+          // Long press actions
+          switch (touch.button) {
+            case 1:
+              ESP_LOGI("device", "Long press: Dimming living room light");
+              // Add dimming logic here
+              break;
+            case 2:
+              ESP_LOGI("device", "Long press: Fan speed control");
+              // Add fan speed control logic here
+              break;
+            default:
+              ESP_LOGI("device", "Long press on button %d not configured", touch.button);
+              break;
+          }
+
+  # Override swipe left handler
+  - id: on_swipe_left_custom
+    mode: restart
+    then:
+      - lambda: |-
+          ESP_LOGI("device", "Swipe left detected at position %d", touch.x);
+          // Turn off all devices
+          living_room_light->turn_off();
+          living_room_fan->turn_off();
+
+  # Override swipe right handler
+  - id: on_swipe_right_custom
+    mode: restart
+    then:
+      - lambda: |-
+          ESP_LOGI("device", "Swipe right detected at position %d", touch.x);
+          // Turn on all devices
+          living_room_light->turn_on();
+          living_room_fan->turn_on();
+
+  # Override multi-touch handler
+  - id: on_multi_touch_release_custom
+    mode: restart
+    then:
+      - lambda: |-
+          ESP_LOGI("device", "Multi-touch detected at position %d", touch.x);
+          // Special multi-touch action - maybe scene cycling
+          // Add your multi-touch logic here
+
+# Optional: Add Home Assistant events
+# Uncomment if you want to send events to Home Assistant
+# homeassistant:
+#   name: "Living Room Panel"
+#   latitude: !secret latitude
+#   longitude: !secret longitude
+#   elevation: !secret elevation
+#   unit_system: metric
+#   timezone: !secret timezone
+
+# Optional: Add sensors
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 60s
+
+# Optional: Add binary sensors
+binary_sensor:
+  - platform: status
+    name: "Status"
+    device_class: connectivity
+
+# Optional: Add more switches for additional functionality
+switch:
+  - platform: template
+    name: "Scene Mode"
+    id: scene_mode
+    optimistic: true
+    turn_on_action:
+      - lambda: |-
+          ESP_LOGI("device", "Scene mode enabled");
+    turn_off_action:
+      - lambda: |-
+          ESP_LOGI("device", "Scene mode disabled");
+
+# Example: Add a script that can be called from touch events
+script:
+  - id: cycle_scenes
+    mode: restart
+    then:
+      - lambda: |-
+          ESP_LOGI("device", "Cycling through scenes");
+          // Add scene cycling logic here
+          if (scene_mode->state) {
+            // Scene mode is on, cycle through scenes
+            ESP_LOGI("device", "Scene mode active - cycling scenes");
+          } else {
+            // Scene mode is off, do something else
+            ESP_LOGI("device", "Scene mode inactive - default behavior");
+          }
