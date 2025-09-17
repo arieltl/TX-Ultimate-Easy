@@ -26,6 +26,8 @@ substitutions:
   
   # Event name for Home Assistant
   EVENT_NAME: esphome.tx_ultimate_easy
+  
+  # No script substitutions needed - using direct automations
 
 esphome:
   name: ${name}
@@ -48,8 +50,7 @@ esphome:
             sw_touch_panel_power->turn_on();
             // Set gang count
             tx_ultimate->set_gang_count(${gang_count});
-            // Initialize relays based on gang count
-            script.execute: initialize_relays;
+        - script.execute: initialize_relays
 
 esp32:
   board: esp32dev
@@ -67,15 +68,15 @@ ota:
   platform: esphome
 
 logger:
-  level: INFO
+  level: VERBOSE
 
 # External component - the C++ touch handler
 external_components:
   - source:
       type: git
-      url: https://github.com/edwardtfn/TX-Ultimate-Easy
-      ref: v${version}
-    refresh: 1h
+      url: https://github.com/arieltl/TX-Ultimate-Easy
+      ref: main
+    refresh: 1min
     components:
       - tx_ultimate_easy
 
@@ -98,36 +99,35 @@ switch:
     internal: true  # Hide from Home Assistant
 
   # Hardware relays (commercial device pins)
-  # These will be enabled/disabled based on gang_count during boot
   - id: output_relay_1
     name: "Relay 1"
     platform: gpio
     pin: GPIO18
     restore_mode: RESTORE_DEFAULT_OFF
-    internal: true  # Will be set to false for enabled relays during boot
+    internal: true  # Hide from Home Assistant by default
 
   - id: output_relay_2
     name: "Relay 2"
     platform: gpio
     pin: GPIO17
     restore_mode: RESTORE_DEFAULT_OFF
-    internal: true  # Will be set to false for enabled relays during boot
+    internal: true  # Hide from Home Assistant by default
 
   - id: output_relay_3
     name: "Relay 3"
     platform: gpio
     pin: GPIO27
     restore_mode: RESTORE_DEFAULT_OFF
-    internal: true  # Will be set to false for enabled relays during boot
+    internal: true  # Hide from Home Assistant by default
 
   - id: output_relay_4
     name: "Relay 4"
     platform: gpio
     pin: GPIO23
     restore_mode: RESTORE_DEFAULT_OFF
-    internal: true  # Will be set to false for enabled relays during boot
+    internal: true  # Hide from Home Assistant by default
 
-# Placeholder scripts that can be overridden in device YAML
+# Relay initialization script
 script:
   - id: initialize_relays
     mode: restart
@@ -154,85 +154,50 @@ script:
             ESP_LOGI("minimal", "Relay 4 enabled");
           }
 
-  - id: on_touch_press_custom
-    mode: restart
-    then:
-      - lambda: |-
-          ESP_LOGI("minimal", "Touch pressed - Button: %d, Position: %d (default handler)", touch.button, touch.x);
-
-  - id: on_touch_release_custom
-    mode: restart
-    then:
-      - lambda: |-
-          ESP_LOGI("minimal", "Touch released - Button: %d, Position: %d (default handler)", touch.button, touch.x);
-
-  - id: on_long_touch_release_custom
-    mode: restart
-    then:
-      - lambda: |-
-          ESP_LOGI("minimal", "Long touch released - Button: %d, Position: %d (default handler)", touch.button, touch.x);
-
-  - id: on_swipe_left_custom
-    mode: restart
-    then:
-      - lambda: |-
-          ESP_LOGI("minimal", "Swipe left detected - Position: %d (default handler)", touch.x);
-
-  - id: on_swipe_right_custom
-    mode: restart
-    then:
-      - lambda: |-
-          ESP_LOGI("minimal", "Swipe right detected - Position: %d (default handler)", touch.x);
-
-  - id: on_multi_touch_release_custom
-    mode: restart
-    then:
-      - lambda: |-
-          ESP_LOGI("minimal", "Multi-touch released - Position: %d (default handler)", touch.x);
-
 # Main touch component - this is where the magic happens
 tx_ultimate_easy:
   id: tx_ultimate
   uart: uart_touch
   
   # Configure gang count from substitution
-  gang_count: !lambda |-
-    uint8_t count = ${gang_count};
-    if (count < 1 || count > 4) {
-      ESP_LOGE("minimal", "Invalid gang count: %d, using 1", count);
-      return 1;
-    }
-    return count;
+  gang_count: ${gang_count}
 
-  # Touch press event - calls custom script
+  # Touch press event - default behavior (can be overridden in device YAML)
   on_press:
     then:
-      - script.execute: on_touch_press_custom
+      - lambda: |-
+          ESP_LOGI("minimal", "Touch pressed - Button: %d, Position: %d (default)", touch.button, touch.x);
 
-  # Touch release event - calls custom script
+  # Touch release event - default behavior (can be overridden in device YAML)
   on_release:
     then:
-      - script.execute: on_touch_release_custom
+      - lambda: |-
+          ESP_LOGI("minimal", "Touch released - Button: %d, Position: %d (default)", touch.button, touch.x);
 
-  # Long touch release event - calls custom script
+  # Long touch release event - default behavior (can be overridden in device YAML)
   on_long_touch_release:
     then:
-      - script.execute: on_long_touch_release_custom
+      - lambda: |-
+          ESP_LOGI("minimal", "Long touch released - Button: %d, Position: %d (default)", touch.button, touch.x);
+          ESP_LOGI("minimal", "Long touch state: %s, x: %d", touch.state_str.c_str(), touch.x);
 
-  # Swipe left event - calls custom script
+  # Swipe left event - default behavior (can be overridden in device YAML)
   on_swipe_left:
     then:
-      - script.execute: on_swipe_left_custom
+      - lambda: |-
+          ESP_LOGI("minimal", "Swipe left detected - Position: %d (default)", touch.x);
 
-  # Swipe right event - calls custom script
+  # Swipe right event - default behavior (can be overridden in device YAML)
   on_swipe_right:
     then:
-      - script.execute: on_swipe_right_custom
+      - lambda: |-
+          ESP_LOGI("minimal", "Swipe right detected - Position: %d (default)", touch.x);
 
-  # Multi-touch event - calls custom script
+  # Multi-touch event - default behavior (can be overridden in device YAML)
   on_multi_touch_release:
     then:
-      - script.execute: on_multi_touch_release_custom
+      - lambda: |-
+          ESP_LOGI("minimal", "Multi-touch released - Position: %d (default)", touch.x);
 
   # Generic touch event - fires for all touch events (for debugging)
   on_touch_event:

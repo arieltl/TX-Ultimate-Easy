@@ -20,6 +20,7 @@ namespace esphome {
 
             while (this->available()) {
                 byte = this->read();
+                ESP_LOGI(TAG, "UART Byte received: %d (0x%02X)", byte, byte);
                 if (byte == HEADER_BYTE_1) {
                     this->handle_touch(uart_received_bytes);
                     i = 0;
@@ -36,11 +37,11 @@ namespace esphome {
         }
 
         void TxUltimateEasy::handle_touch(const std::array<int, UART_RECEIVED_BYTES_SIZE> &uart_received_bytes) {
-            ESP_LOGV(TAG, "------------");
-            ESP_LOGV(TAG, "- UART-Log -");
-            ESP_LOGV(TAG, "------------");
+            ESP_LOGI(TAG, "------------");
+            ESP_LOGI(TAG, "- UART-Log -");
+            ESP_LOGI(TAG, "------------");
             for (int i = 0; i < UART_RECEIVED_BYTES_SIZE; i++) {
-                ESP_LOGV(TAG, "UART - Log - Byte[%i]: %i", i, uart_received_bytes[i]);
+                ESP_LOGI(TAG, "UART - Log - Byte[%i]: %i", i, uart_received_bytes[i]);
             }
             if (this->is_valid_data(uart_received_bytes)) {
                 this->send_touch_(this->get_touch_point(uart_received_bytes));

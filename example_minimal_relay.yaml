@@ -6,9 +6,9 @@
 
 packages:
   tx_ultimate_easy_minimal:
-    url: https://github.com/aieltl/TX-Ultimate-Easy
+    url: https://github.com/arieltl/TX-Ultimate-Easy
     ref: main
-    refresh: 5min
+    refresh: 1min
     files:
       - ESPHome/TX-Ultimate-Easy-ESPHome_minimal.yaml
 
@@ -16,23 +16,22 @@ packages:
 substitutions:
   name: tx-minimal-relay
   friendly_name: TX Minimal Relay
-  gang_count: '3'  # This will enable Relay 1 and Relay 2 in Home Assistant
+  gang_count: '2'  # This will enable Relay 1 and Relay 2 in Home Assistant
   model_format: 'US'
 
-# Use the built-in relays from the minimal component
-# No need to define switches - they're already in the component
-
-# Override only the touch press handler to control the relay
-# All other handlers will use the default behavior (just logging)
-script:
-  - id: on_touch_press_custom
-    mode: restart
+# Override the touch press automation to control relays
+# All other automations will use the default behavior (just logging)
+tx_ultimate_easy:
+  on_press:
     then:
       - lambda: |-
-          ESP_LOGI("minimal", "Button %d pressed at position %d", touch.button, touch.x);
+          ESP_LOGI("device", "Button %d pressed at position %d", touch.button, touch.x);
           if (touch.button == 1) {
-            ESP_LOGI("minimal", "Toggling Relay 1");
+            ESP_LOGI("device", "Toggling Relay 1");
             output_relay_1->toggle();
+          } else if (touch.button == 2) {
+            ESP_LOGI("device", "Toggling Relay 2");
+            output_relay_2->toggle();
           } else {
-            ESP_LOGI("minimal", "Button %d not configured", touch.button);
+            ESP_LOGI("device", "Button %d not configured", touch.button);
           }
