@@ -196,12 +196,16 @@ light:
 
 # Speaker configuration (if media player enabled)
 speaker:
-  - platform: i2s_audio
-    id: speaker_embedded
-    i2s_audio: if_i2s_audio
+  - id: speaker_embedded
+    platform: i2s_audio
     dac_type: external
     i2s_dout_pin: GPIO25
-    mode: mono
+    i2s_audio_id: if_i2s_audio
+    i2s_comm_fmt: stand_msb
+    channel: mono
+    timeout: never
+    bits_per_sample: 16bit
+    sample_rate: 48000
   - platform: mixer
     id: mixer_speaker_embedded
     output_speaker: speaker_embedded
