@@ -20,7 +20,7 @@ substitutions:
   # Configuration - Set these in your device YAML
   gang_count: '1'  # Number of buttons (1-4)
   model_format: 'EU'  # 'EU' or 'US' - affects swipe direction mapping
-  enable_led_feedback: 'true'  # Enable/disable LED feedback on touch events
+  enable_led_feedback: true  # Enable/disable LED feedback on touch events
   
   # Version info
   version: '2024.12.1'
@@ -216,9 +216,9 @@ tx_ultimate_easy:
       - lambda: |-
           ESP_LOGI("minimal", "Custom click detected - Button: %d, Position: %d (default)", touch.button, touch.x);
       - if:
-          template:
-            - condition: |-
-                return ${enable_led_feedback} == "true";
+          condition:
+            lambda: |-
+              return ${enable_led_feedback};
           then:
             - light.turn_on:
                 id: light_full
@@ -235,9 +235,9 @@ tx_ultimate_easy:
       - lambda: |-
           ESP_LOGI("minimal", "Custom long click detected - Button: %d, Position: %d (default)", touch.button, touch.x);
       - if:
-          template:
-            - condition: |-
-                return ${enable_led_feedback} == "true";
+          condition:
+            lambda: |-
+              return ${enable_led_feedback};
           then:
             - light.turn_on:
                 id: light_full
@@ -254,9 +254,9 @@ tx_ultimate_easy:
       - lambda: |-
           ESP_LOGI("minimal", "Swipe left detected - Position: %d (default)", touch.x);
       - if:
-          template:
-            - condition: |-
-                return ${enable_led_feedback} == "true";
+          condition:
+            lambda: |-
+              return ${enable_led_feedback};
           then:
             - light.turn_on:
                 id: light_full
@@ -273,9 +273,9 @@ tx_ultimate_easy:
       - lambda: |-
           ESP_LOGI("minimal", "Swipe right detected - Position: %d (default)", touch.x);
       - if:
-          template:
-            - condition: |-
-                return ${enable_led_feedback} == "true";
+          condition:
+            lambda: |-
+              return ${enable_led_feedback};
           then:
             - light.turn_on:
                 id: light_full
@@ -292,9 +292,9 @@ tx_ultimate_easy:
       - lambda: |-
           ESP_LOGI("minimal", "Multi-touch released - Position: %d (default)", touch.x);
       - if:
-          template:
-            - condition: |-
-                return ${enable_led_feedback} == "true";
+          condition:
+            lambda: |-
+              return ${enable_led_feedback};
           then:
             - light.turn_on:
                 id: light_full
