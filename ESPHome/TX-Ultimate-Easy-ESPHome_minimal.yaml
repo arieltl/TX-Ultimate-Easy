@@ -184,19 +184,8 @@ light:
     internal: false  # Expose to Home Assistant
     default_transition_length: 20ms  # Instant transitions for touch feedback
     effects:
-      - pulse:
-          name: "Pulse"
-          transition_length: 1s
-          update_interval: 16ms
-      - strobe:
-          name: "Strobe"
-          colors:
-            - red: 100%
-              duration: 100ms
-            - green: 100%
-              duration: 100ms
-            - blue: 100%
-              duration: 100ms
+      - addressable_rainbow:
+
 
 # Speaker configuration (if media player enabled)
 speaker:
