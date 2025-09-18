@@ -139,6 +139,7 @@ light:
     max_refresh_rate: 33ms
     restore_mode: RESTORE_DEFAULT_OFF
     internal: false  # Expose to Home Assistant
+    default_transition_length: 20ms  # Instant transitions for touch feedback
     effects:
       - pulse:
           name: "Pulse"
