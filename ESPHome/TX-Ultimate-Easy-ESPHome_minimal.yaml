@@ -148,10 +148,11 @@ light:
           name: "Strobe"
           colors:
             - red: 100%
+              duration: 100ms
             - green: 100%
+              duration: 100ms
             - blue: 100%
-          strobe_length: 100ms
-          transition_length: 50ms
+              duration: 100ms
 
 # Relay initialization script
 script:
