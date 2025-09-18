@@ -211,22 +211,6 @@ speaker:
     bits_per_sample: 16bit
     sample_rate: 48000
     buffer_duration: 500ms
-  - platform: template
-    id: announcement_speaker_embedded
-  - platform: template
-    id: media_speaker_embedded
-  - platform: mixer
-    id: mixer_speaker_embedded
-    output_speaker: speaker_embedded
-    source_speakers:
-      - id: announcement_speaker_embedded
-      - id: media_speaker_embedded
-  - platform: resampler
-    id: announcement_spk_resampling_input
-    output_speaker: announcement_speaker_embedded
-  - platform: resampler
-    id: media_spk_resampling_input
-    output_speaker: media_speaker_embedded
 
 # Media player configuration (if enabled)
 media_player:
@@ -237,12 +221,12 @@ media_player:
     buffer_size: 250000
     task_stack_in_psram: false
     announcement_pipeline:
-      speaker: announcement_spk_resampling_input
+      speaker: speaker_embedded
       format: WAV
       num_channels: 1
       sample_rate: 48000
     media_pipeline:
-      speaker: media_spk_resampling_input
+      speaker: speaker_embedded
       format: FLAC
       num_channels: 1
       sample_rate: 48000
