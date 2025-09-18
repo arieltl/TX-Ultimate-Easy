@@ -262,10 +262,9 @@ number:
     internal: false  # Expose to Home Assistant
     on_value:
       then:
-        - lambda: |-
-            if (id(mp_media_player) != nullptr) {
-              id(mp_media_player)->set_volume(speaker_volume->state / 100.0f);
-            }
+        - speaker.volume_set:
+            id: speaker_embedded
+            volume: !lambda return x/100.0f;
 
 # Global variables for media player
 globals:
