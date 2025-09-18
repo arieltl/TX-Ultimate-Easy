@@ -33,24 +33,45 @@ tx_ultimate_easy:
           if (touch.button == 1) {
             ESP_LOGI("device", "Toggling Relay 1");
             output_relay_1->toggle();
-            // Flash LED green for relay 1
-            light_full->set_rgb(0, 255, 0);
-            light_full->turn_on();
           } else if (touch.button == 2) {
             ESP_LOGI("device", "Toggling Relay 2");
             output_relay_2->toggle();
-            // Flash LED blue for relay 2
-            light_full->set_rgb(0, 0, 255);
-            light_full->turn_on();
           } else if (touch.button == 3) {
             ESP_LOGI("device", "Toggling Relay 3");
             output_relay_3->toggle();
-            // Flash LED yellow for relay 3
-            light_full->set_rgb(255, 255, 0);
-            light_full->turn_on();
           } else {
             ESP_LOGI("device", "Button %d not configured", touch.button);
           }
+      - if:
+          condition:
+            lambda: 'return touch.button == 1;'
+          then:
+            - light.turn_on:
+                id: light_full
+                red: 0%
+                green: 100%
+                blue: 0%
+                brightness: 50%
+      - if:
+          condition:
+            lambda: 'return touch.button == 2;'
+          then:
+            - light.turn_on:
+                id: light_full
+                red: 0%
+                green: 0%
+                blue: 100%
+                brightness: 50%
+      - if:
+          condition:
+            lambda: 'return touch.button == 3;'
+          then:
+            - light.turn_on:
+                id: light_full
+                red: 100%
+                green: 100%
+                blue: 0%
+                brightness: 50%
       - delay: 200ms
       - light.turn_off: light_full
 
@@ -63,8 +84,11 @@ tx_ultimate_easy:
           output_relay_1->turn_off();
           output_relay_2->turn_off();
           output_relay_3->turn_off();
-          // Flash LED red for all off
-          light_full->set_rgb(255, 0, 0);
-          light_full->turn_on();
+      - light.turn_on:
+          id: light_full
+          red: 100%
+          green: 0%
+          blue: 0%
+          brightness: 50%
       - delay: 500ms
       - light.turn_off: light_full

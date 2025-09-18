@@ -213,9 +213,12 @@ tx_ultimate_easy:
     then:
       - lambda: |-
           ESP_LOGI("minimal", "Custom click detected - Button: %d, Position: %d (default)", touch.button, touch.x);
-          // Flash LED white for default click
-          light_full->set_rgb(255, 255, 255);
-          light_full->turn_on();
+      - light.turn_on:
+          id: light_full
+          red: 100%
+          green: 100%
+          blue: 100%
+          brightness: 50%
       - delay: 100ms
       - light.turn_off: light_full
 
@@ -224,9 +227,12 @@ tx_ultimate_easy:
     then:
       - lambda: |-
           ESP_LOGI("minimal", "Custom long click detected - Button: %d, Position: %d (default)", touch.button, touch.x);
-          // Flash LED orange for default long click
-          light_full->set_rgb(255, 165, 0);
-          light_full->turn_on();
+      - light.turn_on:
+          id: light_full
+          red: 100%
+          green: 65%
+          blue: 0%
+          brightness: 50%
       - delay: 300ms
       - light.turn_off: light_full
 
@@ -235,9 +241,12 @@ tx_ultimate_easy:
     then:
       - lambda: |-
           ESP_LOGI("minimal", "Swipe left detected - Position: %d (default)", touch.x);
-          // Flash LED cyan for swipe left
-          light_full->set_rgb(0, 255, 255);
-          light_full->turn_on();
+      - light.turn_on:
+          id: light_full
+          red: 0%
+          green: 100%
+          blue: 100%
+          brightness: 50%
       - delay: 150ms
       - light.turn_off: light_full
 
@@ -246,9 +255,12 @@ tx_ultimate_easy:
     then:
       - lambda: |-
           ESP_LOGI("minimal", "Swipe right detected - Position: %d (default)", touch.x);
-          // Flash LED magenta for swipe right
-          light_full->set_rgb(255, 0, 255);
-          light_full->turn_on();
+      - light.turn_on:
+          id: light_full
+          red: 100%
+          green: 0%
+          blue: 100%
+          brightness: 50%
       - delay: 150ms
       - light.turn_off: light_full
 
@@ -257,9 +269,12 @@ tx_ultimate_easy:
     then:
       - lambda: |-
           ESP_LOGI("minimal", "Multi-touch released - Position: %d (default)", touch.x);
-          // Flash LED purple for multi-touch
-          light_full->set_rgb(128, 0, 128);
-          light_full->turn_on();
+      - light.turn_on:
+          id: light_full
+          red: 50%
+          green: 0%
+          blue: 50%
+          brightness: 50%
       - delay: 200ms
       - light.turn_off: light_full
 
