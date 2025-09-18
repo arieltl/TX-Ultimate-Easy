@@ -66,6 +66,10 @@ esphome:
               lambda: |-
                 return ${enable_media_player};
             then:
+              - switch.turn_on: sw_audio_amplifier
+              - number.set:
+                  id: speaker_volume
+                  value: ${media_player_volume}
               - script.execute: sync_initial_volume
 
 esp32:
@@ -199,13 +203,14 @@ speaker:
   - id: speaker_embedded
     platform: i2s_audio
     dac_type: external
-    i2s_dout_pin: GPIO25
+    i2s_dout_pin: GPIO15
     i2s_audio_id: if_i2s_audio
     i2s_comm_fmt: stand_msb
     channel: mono
     timeout: never
     bits_per_sample: 16bit
     sample_rate: 48000
+    buffer_duration: 500ms
   - platform: mixer
     id: mixer_speaker_embedded
     output_speaker: speaker_embedded
@@ -222,7 +227,7 @@ speaker:
 # Media player configuration (if enabled)
 media_player:
   - id: mp_media_player
-    name: "TX Ultimate Media Player"
+    name: "Media Player"
     platform: speaker
     codec_support_enabled: true
     buffer_size: 250000
@@ -257,10 +262,14 @@ number:
     min_value: 0
     step: 1
     initial_value: ${media_player_volume}
-    optimistic: true
+    unit_of_measurement: "%"
+    internal: false
+    disabled_by_default: false
+    entity_category: config
+    device_class: sound_pressure
     restore_value: true
-    internal: false  # Expose to Home Assistant
-    on_value:
+    optimistic: true
+    set_action:
       then:
         - speaker.volume_set:
             id: speaker_embedded
@@ -321,7 +330,8 @@ script:
       - delay: 2s  # Wait for media player to initialize
       - media_player.volume_set:
           id: mp_media_player
-          volume: !lambda  return id(persistent_media_player_volume) / 100.0f;
+          volume: !lambda |-
+            return id(persistent_media_player_volume) / 100.0f;
       - lambda: |-
           id(last_media_player_volume) = id(persistent_media_player_volume);
           ESP_LOGI("minimal", "Initial volume sync: %.1f%% (restored from persistence)", id(persistent_media_player_volume));
