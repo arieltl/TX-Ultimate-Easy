@@ -211,6 +211,10 @@ speaker:
     bits_per_sample: 16bit
     sample_rate: 48000
     buffer_duration: 500ms
+  - platform: speaker
+    id: announcement_speaker_embedded
+  - platform: speaker
+    id: media_speaker_embedded
   - platform: mixer
     id: mixer_speaker_embedded
     output_speaker: speaker_embedded
