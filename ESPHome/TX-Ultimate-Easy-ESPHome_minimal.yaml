@@ -20,7 +20,7 @@ substitutions:
   # Configuration - Set these in your device YAML
   gang_count: '1'  # Number of buttons (1-4)
   model_format: 'EU'  # 'EU' or 'US' - affects swipe direction mapping
-  enable_led_feedback: 'true'  # Enable/disable LED feedback on touch events
+  enable_led_feedback: 1  # Enable/disable LED feedback on touch events (1=true, 0=false)
   
   # Version info
   version: '2024.12.1'
@@ -70,6 +70,7 @@ ota:
 
 logger:
   level: VERBOSE
+
 
 # External component - the C++ touch handler
 external_components:
@@ -218,7 +219,7 @@ tx_ultimate_easy:
       - if:
           condition:
             lambda: |-
-              return ${enable_led_feedback} == "true";
+              return ${enable_led_feedback};
           then:
             - light.turn_on:
                 id: light_full
@@ -237,7 +238,7 @@ tx_ultimate_easy:
       - if:
           condition:
             lambda: |-
-              return ${enable_led_feedback} == "true";
+              return ${enable_led_feedback};
           then:
             - light.turn_on:
                 id: light_full
@@ -256,7 +257,7 @@ tx_ultimate_easy:
       - if:
           condition:
             lambda: |-
-              return ${enable_led_feedback} == "true";
+              return ${ enable_led_feedback};
           then:
             - light.turn_on:
                 id: light_full
@@ -275,7 +276,7 @@ tx_ultimate_easy:
       - if:
           condition:
             lambda: |-
-              return ${enable_led_feedback} == "true";
+              return ${enable_led_feedback};
           then:
             - light.turn_on:
                 id: light_full
@@ -294,7 +295,7 @@ tx_ultimate_easy:
       - if:
           condition:
             lambda: |-
-              return ${enable_led_feedback} == "true";
+              return ${enable_led_feedback};
           then:
             - light.turn_on:
                 id: light_full
