@@ -216,8 +216,9 @@ tx_ultimate_easy:
       - lambda: |-
           ESP_LOGI("minimal", "Custom click detected - Button: %d, Position: %d (default)", touch.button, touch.x);
       - if:
-          condition:
-            lambda: 'return ${enable_led_feedback} == "true";'
+          template:
+            - condition: |-
+                return ${enable_led_feedback} == "true";
           then:
             - light.turn_on:
                 id: light_full
@@ -234,8 +235,9 @@ tx_ultimate_easy:
       - lambda: |-
           ESP_LOGI("minimal", "Custom long click detected - Button: %d, Position: %d (default)", touch.button, touch.x);
       - if:
-          condition:
-            lambda: 'return ${enable_led_feedback} == "true";'
+          template:
+            - condition: |-
+                return ${enable_led_feedback} == "true";
           then:
             - light.turn_on:
                 id: light_full
@@ -252,8 +254,9 @@ tx_ultimate_easy:
       - lambda: |-
           ESP_LOGI("minimal", "Swipe left detected - Position: %d (default)", touch.x);
       - if:
-          condition:
-            lambda: 'return ${enable_led_feedback} == "true";'
+          template:
+            - condition: |-
+                return ${enable_led_feedback} == "true";
           then:
             - light.turn_on:
                 id: light_full
@@ -270,8 +273,9 @@ tx_ultimate_easy:
       - lambda: |-
           ESP_LOGI("minimal", "Swipe right detected - Position: %d (default)", touch.x);
       - if:
-          condition:
-            lambda: 'return ${enable_led_feedback} == "true";'
+          template:
+            - condition: |-
+                return ${enable_led_feedback} == "true";
           then:
             - light.turn_on:
                 id: light_full
@@ -288,8 +292,9 @@ tx_ultimate_easy:
       - lambda: |-
           ESP_LOGI("minimal", "Multi-touch released - Position: %d (default)", touch.x);
       - if:
-          condition:
-            lambda: 'return ${enable_led_feedback} == "true";'
+          template:
+            - condition: |-
+                return ${enable_led_feedback} == "true";
           then:
             - light.turn_on:
                 id: light_full
