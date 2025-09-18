@@ -33,7 +33,9 @@ tx_ultimate_easy:
     then:
       - lambda: |-
           ESP_LOGI("device", "Press - Button %d at position %d", touch.button, touch.x);
-      - script.execute: vibrate
+      - script.execute:
+          id: vibrate
+          duration: ${haptic_duration}
   # Custom click (short press < 400ms) - toggle relays and flash LED
   on_custom_click:
     then:

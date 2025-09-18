@@ -201,7 +201,7 @@ script:
   - id: vibrate
     mode: restart
     parameters:
-      duration: int = ${haptic_duration}
+      duration: int
     then:
       - switch.turn_on: sw_vibration_motor
       - delay: !lambda return duration;
