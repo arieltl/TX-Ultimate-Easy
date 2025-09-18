@@ -25,7 +25,7 @@ tx_ultimate_easy:
   # Customize the long click threshold for this device
   custom_long_click_threshold: 400  # 400ms threshold
   
-  # Custom click (short press < 400ms) - toggle relays
+  # Custom click (short press < 400ms) - toggle relays and flash LED
   on_custom_click:
     then:
       - lambda: |-
@@ -33,14 +33,28 @@ tx_ultimate_easy:
           if (touch.button == 1) {
             ESP_LOGI("device", "Toggling Relay 1");
             output_relay_1->toggle();
+            // Flash LED green for relay 1
+            light_full->set_rgb(0, 255, 0);
+            light_full->turn_on();
           } else if (touch.button == 2) {
             ESP_LOGI("device", "Toggling Relay 2");
             output_relay_2->toggle();
+            // Flash LED blue for relay 2
+            light_full->set_rgb(0, 0, 255);
+            light_full->turn_on();
+          } else if (touch.button == 3) {
+            ESP_LOGI("device", "Toggling Relay 3");
+            output_relay_3->toggle();
+            // Flash LED yellow for relay 3
+            light_full->set_rgb(255, 255, 0);
+            light_full->turn_on();
           } else {
             ESP_LOGI("device", "Button %d not configured", touch.button);
           }
+      - delay: 200ms
+      - light.turn_off: light_full
 
-  # Custom long click (long press >= 400ms) - turn off all relays
+  # Custom long click (long press >= 400ms) - turn off all relays and flash red
   on_custom_long_click:
     then:
       - lambda: |-
@@ -48,3 +62,9 @@ tx_ultimate_easy:
           ESP_LOGI("device", "Turning off all relays");
           output_relay_1->turn_off();
           output_relay_2->turn_off();
+          output_relay_3->turn_off();
+          // Flash LED red for all off
+          light_full->set_rgb(255, 0, 0);
+          light_full->turn_on();
+      - delay: 500ms
+      - light.turn_off: light_full

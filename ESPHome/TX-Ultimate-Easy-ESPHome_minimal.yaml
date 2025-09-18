@@ -127,6 +127,32 @@ switch:
     restore_mode: RESTORE_DEFAULT_OFF
     internal: true  # Hide from Home Assistant by default
 
+# LED strip configuration
+light:
+  - id: light_full
+    name: "TX Ultimate LEDs"
+    platform: esp32_rmt_led_strip
+    chipset: ws2812
+    pin: GPIO13
+    num_leds: 32
+    rgb_order: GRB
+    max_refresh_rate: 33ms
+    restore_mode: RESTORE_DEFAULT_OFF
+    internal: false  # Expose to Home Assistant
+    effects:
+      - pulse:
+          name: "Pulse"
+          transition_length: 1s
+          update_interval: 16ms
+      - strobe:
+          name: "Strobe"
+          colors:
+            - red: 100%
+            - green: 100%
+            - blue: 100%
+          strobe_length: 100ms
+          transition_length: 50ms
+
 # Relay initialization script
 script:
   - id: initialize_relays
@@ -186,30 +212,55 @@ tx_ultimate_easy:
     then:
       - lambda: |-
           ESP_LOGI("minimal", "Custom click detected - Button: %d, Position: %d (default)", touch.button, touch.x);
+          // Flash LED white for default click
+          light_full->set_rgb(255, 255, 255);
+          light_full->turn_on();
+      - delay: 100ms
+      - light.turn_off: light_full
 
   # Custom long click detection - default behavior (can be overridden in device YAML)
   on_custom_long_click:
     then:
       - lambda: |-
           ESP_LOGI("minimal", "Custom long click detected - Button: %d, Position: %d (default)", touch.button, touch.x);
+          // Flash LED orange for default long click
+          light_full->set_rgb(255, 165, 0);
+          light_full->turn_on();
+      - delay: 300ms
+      - light.turn_off: light_full
 
   # Swipe left event - default behavior (can be overridden in device YAML)
   on_swipe_left:
     then:
       - lambda: |-
           ESP_LOGI("minimal", "Swipe left detected - Position: %d (default)", touch.x);
+          // Flash LED cyan for swipe left
+          light_full->set_rgb(0, 255, 255);
+          light_full->turn_on();
+      - delay: 150ms
+      - light.turn_off: light_full
 
   # Swipe right event - default behavior (can be overridden in device YAML)
   on_swipe_right:
     then:
       - lambda: |-
           ESP_LOGI("minimal", "Swipe right detected - Position: %d (default)", touch.x);
+          // Flash LED magenta for swipe right
+          light_full->set_rgb(255, 0, 255);
+          light_full->turn_on();
+      - delay: 150ms
+      - light.turn_off: light_full
 
   # Multi-touch event - default behavior (can be overridden in device YAML)
   on_multi_touch_release:
     then:
       - lambda: |-
           ESP_LOGI("minimal", "Multi-touch released - Position: %d (default)", touch.x);
+          // Flash LED purple for multi-touch
+          light_full->set_rgb(128, 0, 128);
+          light_full->turn_on();
+      - delay: 200ms
+      - light.turn_off: light_full
 
   # Generic touch event - fires for all touch events (for debugging)
   on_touch_event:
