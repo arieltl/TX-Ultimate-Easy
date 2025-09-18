@@ -16,8 +16,9 @@ packages:
 substitutions:
   name: tx-minimal-relay
   friendly_name: TX Minimal Relay
-  gang_count: '3'  # This will enable Relay 1 and Relay 2 in Home Assistant
+  gang_count: '3'  # This will enable Relay 1, Relay 2, and Relay 3 in Home Assistant
   model_format: 'US'
+  enable_led_feedback: 'false'  # Disable default LED feedback (we have custom LED control)
 
 # Override the custom click automations to control relays
 # All other automations will use the default behavior (just logging)

@@ -20,6 +20,7 @@ substitutions:
   # Configuration - Set these in your device YAML
   gang_count: '1'  # Number of buttons (1-4)
   model_format: 'EU'  # 'EU' or 'US' - affects swipe direction mapping
+  enable_led_feedback: 'true'  # Enable/disable LED feedback on touch events
   
   # Version info
   version: '2024.12.1'
@@ -214,70 +215,90 @@ tx_ultimate_easy:
     then:
       - lambda: |-
           ESP_LOGI("minimal", "Custom click detected - Button: %d, Position: %d (default)", touch.button, touch.x);
-      - light.turn_on:
-          id: light_full
-          red: 100%
-          green: 100%
-          blue: 100%
-          brightness: 50%
-      - delay: 100ms
-      - light.turn_off: light_full
+      - if:
+          condition:
+            lambda: 'return ${enable_led_feedback} == "true";'
+          then:
+            - light.turn_on:
+                id: light_full
+                red: 100%
+                green: 100%
+                blue: 100%
+                brightness: 50%
+            - delay: 100ms
+            - light.turn_off: light_full
 
   # Custom long click detection - default behavior (can be overridden in device YAML)
   on_custom_long_click:
     then:
       - lambda: |-
           ESP_LOGI("minimal", "Custom long click detected - Button: %d, Position: %d (default)", touch.button, touch.x);
-      - light.turn_on:
-          id: light_full
-          red: 100%
-          green: 65%
-          blue: 0%
-          brightness: 50%
-      - delay: 300ms
-      - light.turn_off: light_full
+      - if:
+          condition:
+            lambda: 'return ${enable_led_feedback} == "true";'
+          then:
+            - light.turn_on:
+                id: light_full
+                red: 100%
+                green: 65%
+                blue: 0%
+                brightness: 50%
+            - delay: 300ms
+            - light.turn_off: light_full
 
   # Swipe left event - default behavior (can be overridden in device YAML)
   on_swipe_left:
     then:
       - lambda: |-
           ESP_LOGI("minimal", "Swipe left detected - Position: %d (default)", touch.x);
-      - light.turn_on:
-          id: light_full
-          red: 0%
-          green: 100%
-          blue: 100%
-          brightness: 50%
-      - delay: 150ms
-      - light.turn_off: light_full
+      - if:
+          condition:
+            lambda: 'return ${enable_led_feedback} == "true";'
+          then:
+            - light.turn_on:
+                id: light_full
+                red: 0%
+                green: 100%
+                blue: 100%
+                brightness: 50%
+            - delay: 150ms
+            - light.turn_off: light_full
 
   # Swipe right event - default behavior (can be overridden in device YAML)
   on_swipe_right:
     then:
       - lambda: |-
           ESP_LOGI("minimal", "Swipe right detected - Position: %d (default)", touch.x);
-      - light.turn_on:
-          id: light_full
-          red: 100%
-          green: 0%
-          blue: 100%
-          brightness: 50%
-      - delay: 150ms
-      - light.turn_off: light_full
+      - if:
+          condition:
+            lambda: 'return ${enable_led_feedback} == "true";'
+          then:
+            - light.turn_on:
+                id: light_full
+                red: 100%
+                green: 0%
+                blue: 100%
+                brightness: 50%
+            - delay: 150ms
+            - light.turn_off: light_full
 
   # Multi-touch event - default behavior (can be overridden in device YAML)
   on_multi_touch_release:
     then:
       - lambda: |-
           ESP_LOGI("minimal", "Multi-touch released - Position: %d (default)", touch.x);
-      - light.turn_on:
-          id: light_full
-          red: 50%
-          green: 0%
-          blue: 50%
-          brightness: 50%
-      - delay: 200ms
-      - light.turn_off: light_full
+      - if:
+          condition:
+            lambda: 'return ${enable_led_feedback} == "true";'
+          then:
+            - light.turn_on:
+                id: light_full
+                red: 50%
+                green: 0%
+                blue: 50%
+                brightness: 50%
+            - delay: 200ms
+            - light.turn_off: light_full
 
   # Generic touch event - fires for all touch events (for debugging)
   on_touch_event:
