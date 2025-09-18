@@ -47,6 +47,10 @@ namespace esphome {
             Trigger<TouchPoint> *get_trigger_swipe_right() { return &this->trigger_swipe_right_; }
             Trigger<TouchPoint> *get_trigger_multi_touch_release() { return &this->trigger_multi_touch_release_; }
             Trigger<TouchPoint> *get_trigger_long_touch_release() { return &this->trigger_long_touch_release_; }
+            
+            // Custom touch detection triggers
+            Trigger<TouchPoint> *get_trigger_custom_click() { return &this->trigger_custom_click_; }
+            Trigger<TouchPoint> *get_trigger_custom_long_click() { return &this->trigger_custom_long_click_; }
 
             void set_uart_component(esphome::uart::UARTComponent *uart_component) { this->set_uart_parent(uart_component); }
 
@@ -57,10 +61,14 @@ namespace esphome {
             uint8_t get_gang_count() { return this->gang_count_; }
             bool set_gang_count(const uint8_t gang_count);
             uint8_t get_button_from_position(const uint8_t position);
+            
+            uint32_t get_custom_long_click_threshold() { return this->custom_long_click_threshold_; }
+            void set_custom_long_click_threshold(const uint32_t threshold);
 
         protected:
             void send_touch_(TouchPoint tp);
             void handle_touch(const std::array<int, UART_RECEIVED_BYTES_SIZE> &bytes);
+            void reset_custom_touch_state_();
 
             TouchPoint get_touch_point(const std::array<int, UART_RECEIVED_BYTES_SIZE> &bytes);
             bool is_valid_data(const std::array<int, UART_RECEIVED_BYTES_SIZE> &bytes);
@@ -74,8 +82,19 @@ namespace esphome {
             Trigger<TouchPoint> trigger_swipe_right_;
             Trigger<TouchPoint> trigger_multi_touch_release_;
             Trigger<TouchPoint> trigger_long_touch_release_;
+            
+            // Custom touch detection
+            Trigger<TouchPoint> trigger_custom_click_;
+            Trigger<TouchPoint> trigger_custom_long_click_;
 
             uint8_t gang_count_ = 1;
+            uint32_t custom_long_click_threshold_ = 500;  // Default 500ms
+            
+            // Touch state tracking
+            bool touch_pressed_ = false;
+            uint32_t touch_press_time_ = 0;
+            uint8_t touch_press_position_ = 0;
+            uint8_t touch_press_button_ = 0;
 
         }; // class TxUltimateEasy
 

@@ -16,16 +16,20 @@ packages:
 substitutions:
   name: tx-minimal-relay
   friendly_name: TX Minimal Relay
-  gang_count: '2'  # This will enable Relay 1 and Relay 2 in Home Assistant
+  gang_count: '3'  # This will enable Relay 1 and Relay 2 in Home Assistant
   model_format: 'US'
 
-# Override the touch press automation to control relays
+# Override the custom click automations to control relays
 # All other automations will use the default behavior (just logging)
 tx_ultimate_easy:
-  on_press:
+  # Customize the long click threshold for this device
+  custom_long_click_threshold: 400  # 400ms threshold
+  
+  # Custom click (short press < 400ms) - toggle relays
+  on_custom_click:
     then:
       - lambda: |-
-          ESP_LOGI("device", "Button %d pressed at position %d", touch.button, touch.x);
+          ESP_LOGI("device", "Custom click - Button %d at position %d", touch.button, touch.x);
           if (touch.button == 1) {
             ESP_LOGI("device", "Toggling Relay 1");
             output_relay_1->toggle();
@@ -35,3 +39,12 @@ tx_ultimate_easy:
           } else {
             ESP_LOGI("device", "Button %d not configured", touch.button);
           }
+
+  # Custom long click (long press >= 400ms) - turn off all relays
+  on_custom_long_click:
+    then:
+      - lambda: |-
+          ESP_LOGI("device", "Custom long click - Button %d at position %d", touch.button, touch.x);
+          ESP_LOGI("device", "Turning off all relays");
+          output_relay_1->turn_off();
+          output_relay_2->turn_off();

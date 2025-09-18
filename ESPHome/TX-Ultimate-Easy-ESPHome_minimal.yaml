@@ -158,6 +158,7 @@ script:
 tx_ultimate_easy:
   id: tx_ultimate
   uart: uart_touch
+  custom_long_click_threshold: 300  # 300ms for faster long click detection
   
   # Configure gang count from substitution
   gang_count: ${gang_count}
@@ -178,8 +179,19 @@ tx_ultimate_easy:
   on_long_touch_release:
     then:
       - lambda: |-
-          ESP_LOGI("minimal", "Long touch released - Button: %d, Position: %d (default)", touch.button, touch.x);
-          ESP_LOGI("minimal", "Long touch state: %s, x: %d", touch.state_str.c_str(), touch.x);
+          ESP_LOGI("minimal", "Hardware long touch released - Button: %d, Position: %d (default)", touch.button, touch.x);
+
+  # Custom click detection - default behavior (can be overridden in device YAML)
+  on_custom_click:
+    then:
+      - lambda: |-
+          ESP_LOGI("minimal", "Custom click detected - Button: %d, Position: %d (default)", touch.button, touch.x);
+
+  # Custom long click detection - default behavior (can be overridden in device YAML)
+  on_custom_long_click:
+    then:
+      - lambda: |-
+          ESP_LOGI("minimal", "Custom long click detected - Button: %d, Position: %d (default)", touch.button, touch.x);
 
   # Swipe left event - default behavior (can be overridden in device YAML)
   on_swipe_left:

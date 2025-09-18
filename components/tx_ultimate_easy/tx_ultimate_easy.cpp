@@ -12,6 +12,16 @@ namespace esphome {
             ESP_LOGI(TAG, "TX Ultimate Easy is initialized");
         }
 
+        void TxUltimateEasy::reset_custom_touch_state_() {
+            if (this->touch_pressed_) {
+                ESP_LOGI(TAG, "Custom: Resetting touch state due to other event");
+                this->touch_pressed_ = false;
+                this->touch_press_time_ = 0;
+                this->touch_press_position_ = 0;
+                this->touch_press_button_ = 0;
+            }
+        }
+
         void TxUltimateEasy::loop() {
             bool found = false;
             std::array<int, UART_RECEIVED_BYTES_SIZE> uart_received_bytes{};
@@ -20,7 +30,6 @@ namespace esphome {
 
             while (this->available()) {
                 byte = this->read();
-                ESP_LOGI(TAG, "UART Byte received: %d (0x%02X)", byte, byte);
                 if (byte == HEADER_BYTE_1) {
                     this->handle_touch(uart_received_bytes);
                     i = 0;
@@ -37,12 +46,6 @@ namespace esphome {
         }
 
         void TxUltimateEasy::handle_touch(const std::array<int, UART_RECEIVED_BYTES_SIZE> &uart_received_bytes) {
-            ESP_LOGI(TAG, "------------");
-            ESP_LOGI(TAG, "- UART-Log -");
-            ESP_LOGI(TAG, "------------");
-            for (int i = 0; i < UART_RECEIVED_BYTES_SIZE; i++) {
-                ESP_LOGI(TAG, "UART - Log - Byte[%i]: %i", i, uart_received_bytes[i]);
-            }
             if (this->is_valid_data(uart_received_bytes)) {
                 this->send_touch_(this->get_touch_point(uart_received_bytes));
             }
@@ -59,6 +62,16 @@ namespace esphome {
                 return false;
             this->gang_count_ = gang_count;
             return true;
+        }
+
+        void TxUltimateEasy::set_custom_long_click_threshold(const uint32_t threshold) {
+            if (threshold < 100 || threshold > 5000) {
+                ESP_LOGW(TAG, "Custom long click threshold %dms out of range (100-5000ms), using default 500ms", threshold);
+                this->custom_long_click_threshold_ = 500;
+            } else {
+                this->custom_long_click_threshold_ = threshold;
+                ESP_LOGI(TAG, "Custom long click threshold set to: %dms", threshold);
+            }
         }
 
         uint8_t TxUltimateEasy::get_button_from_position(const uint8_t position) {
@@ -83,36 +96,79 @@ namespace esphome {
 
         void TxUltimateEasy::send_touch_(TouchPoint tp) {
             this->trigger_touch_event_.trigger(tp);
+            
+            // Custom touch detection logic
             switch (tp.state) {
-                case TOUCH_STATE_RELEASE:
-                    if (tp.x >= 17) {
-                        tp.x -= 16;
-                        ESP_LOGV(TAG, "Long touch - Released (x=%d)", tp.x);
-                        this->trigger_long_touch_release_.trigger(tp);
-                    } else {
-                        ESP_LOGV(TAG, "Touch - Released (x=%d)", tp.x);
-                        this->trigger_release_.trigger(tp);
-                    }
-                    break;
-
                 case TOUCH_STATE_PRESS:
                     ESP_LOGV(TAG, "Touch - Pressed (x=%d)", tp.x);
                     this->trigger_touch_.trigger(tp);
+                    
+                    // Start tracking for custom click detection
+                    this->touch_pressed_ = true;
+                    this->touch_press_time_ = millis();
+                    this->touch_press_position_ = tp.x;
+                    this->touch_press_button_ = tp.button;
+                    ESP_LOGI(TAG, "Custom: Touch press started - Button: %d, Position: %d", tp.button, tp.x);
+                    break;
+
+                case TOUCH_STATE_RELEASE:
+                    if (this->touch_pressed_) {
+                        uint32_t press_duration = millis() - this->touch_press_time_;
+                        ESP_LOGI(TAG, "Custom: Touch release - Duration: %dms, Button: %d, Position: %d", 
+                                press_duration, this->touch_press_button_, this->touch_press_position_);
+                        
+                        // Create touch point with original press data
+                        TouchPoint custom_tp;
+                        custom_tp.button = this->touch_press_button_;
+                        custom_tp.x = this->touch_press_position_;
+                        custom_tp.state = tp.state;
+                        custom_tp.state_str = tp.state_str;
+                        
+                        if (press_duration >= this->custom_long_click_threshold_) {
+                            ESP_LOGI(TAG, "Custom: Long click detected (%dms >= %dms)", press_duration, this->custom_long_click_threshold_);
+                            this->trigger_custom_long_click_.trigger(custom_tp);
+                        } else {
+                            ESP_LOGI(TAG, "Custom: Click detected (%dms < %dms)", press_duration, this->custom_long_click_threshold_);
+                            this->trigger_custom_click_.trigger(custom_tp);
+                        }
+                        
+                        // Reset tracking state
+                        this->touch_pressed_ = false;
+                        this->touch_press_time_ = 0;
+                        this->touch_press_position_ = 0;
+                        this->touch_press_button_ = 0;
+                    }
+                    
+                    // Also trigger original release for compatibility
+                    if (tp.x >= 17) {
+                        tp.x -= 16;
+                        ESP_LOGV(TAG, "Hardware long touch - Released (x=%d)", tp.x);
+                        this->trigger_long_touch_release_.trigger(tp);
+                    } else {
+                        ESP_LOGV(TAG, "Hardware touch - Released (x=%d)", tp.x);
+                        this->trigger_release_.trigger(tp);
+                    }
                     break;
 
                 case TOUCH_STATE_SWIPE_LEFT:
                     ESP_LOGV(TAG, "Swipe - Left (x=%d)", tp.x);
                     this->trigger_swipe_left_.trigger(tp);
+                    // Reset custom touch tracking
+                    this->reset_custom_touch_state_();
                     break;
 
                 case TOUCH_STATE_SWIPE_RIGHT:
                     ESP_LOGV(TAG, "Swipe - Right (x=%d)", tp.x);
                     this->trigger_swipe_right_.trigger(tp);
+                    // Reset custom touch tracking
+                    this->reset_custom_touch_state_();
                     break;
 
                 case TOUCH_STATE_MULTI_TOUCH:
                     ESP_LOGV(TAG, "Multi touch - Released");
                     this->trigger_multi_touch_release_.trigger(tp);
+                    // Reset custom touch tracking
+                    this->reset_custom_touch_state_();
                     break;
 
                 default:
