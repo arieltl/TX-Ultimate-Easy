@@ -272,11 +272,11 @@ globals:
   - id: last_media_player_volume
     type: uint8_t
     restore_value: false
-    initial_value: '${media_player_volume}'
+    initial_value: '100'
   - id: persistent_media_player_volume
     type: uint8_t
     restore_value: true
-    initial_value: '${media_player_volume}'
+    initial_value: '100'
 
 # Relay initialization script
 script:
