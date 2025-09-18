@@ -21,6 +21,8 @@ substitutions:
   gang_count: '1'  # Number of buttons (1-4)
   model_format: 'EU'  # 'EU' or 'US' - affects swipe direction mapping
   enable_led_feedback: 1  # Enable/disable LED feedback on touch events (1=true, 0=false)
+  enable_haptic_feedback: 1  # Enable/disable haptic feedback on touch events (1=true, 0=false)
+  haptic_duration: 15  # Haptic feedback duration in milliseconds (1-500)
   
   # Version info
   version: '2024.12.1'
@@ -47,6 +49,9 @@ esphome:
             ESP_LOGI("minimal", "TX Ultimate Easy Minimal - Starting up");
             ESP_LOGI("minimal", "Gang count: ${gang_count}");
             ESP_LOGI("minimal", "Model format: ${model_format}");
+            ESP_LOGI("minimal", "LED feedback: ${enable_led_feedback}");
+            ESP_LOGI("minimal", "Haptic feedback: ${enable_haptic_feedback}");
+            ESP_LOGI("minimal", "Haptic duration: ${haptic_duration}ms");
             // Initialize touch panel
             sw_touch_panel_power->turn_on();
             // Set gang count
@@ -129,6 +134,14 @@ switch:
     restore_mode: RESTORE_DEFAULT_OFF
     internal: true  # Hide from Home Assistant by default
 
+  # Vibration motor for haptic feedback
+  - id: sw_vibration_motor
+    name: "Vibration Motor"
+    platform: gpio
+    pin: GPIO21
+    restore_mode: ALWAYS_OFF
+    internal: true  # Hide from Home Assistant
+
 # LED strip configuration
 light:
   - id: light_full
@@ -183,6 +196,16 @@ script:
             output_relay_4->set_internal(false);
             ESP_LOGI("minimal", "Relay 4 enabled");
           }
+
+  # Haptic feedback script
+  - id: vibrate
+    mode: restart
+    parameters:
+      duration: int = ${haptic_duration}
+    then:
+      - switch.turn_on: sw_vibration_motor
+      - delay: !lambda return duration;
+      - switch.turn_off: sw_vibration_motor
 
 # Main touch component - this is where the magic happens
 tx_ultimate_easy:

@@ -18,7 +18,9 @@ substitutions:
   friendly_name: TX Minimal Relay
   gang_count: '3'  # This will enable Relay 1, Relay 2, and Relay 3 in Home Assistant
   model_format: 'US'
-  enable_led_feedback: 0  # Disable default LED feedback (we have custom LED control) 
+  enable_led_feedback: 0  # Disable default LED feedback (we have custom LED control)
+  enable_haptic_feedback: 1  # Enable haptic feedback on touch events
+  haptic_duration: 20  # Haptic feedback duration in milliseconds
 
 # Override the custom click automations to control relays
 # All other automations will use the default behavior (just logging)
@@ -26,6 +28,12 @@ tx_ultimate_easy:
   # Customize the long click threshold for this device
   custom_long_click_threshold: 400  # 400ms threshold
   
+
+  on_press:
+    then:
+      - lambda: |-
+          ESP_LOGI("device", "Press - Button %d at position %d", touch.button, touch.x);
+      - script.execute: vibrate
   # Custom click (short press < 400ms) - toggle relays and flash LED
   on_custom_click:
     then:
