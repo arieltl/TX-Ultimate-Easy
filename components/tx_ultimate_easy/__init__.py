@@ -27,6 +27,17 @@ CONF_ON_CUSTOM_CLICK = "on_custom_click"
 CONF_ON_CUSTOM_LONG_CLICK = "on_custom_long_click"
 CONF_CUSTOM_LONG_CLICK_THRESHOLD = "custom_long_click_threshold"
 
+# Default duplicate event keys
+CONF_DEFAULT_ON_TOUCH_EVENT = "default_on_touch_event"
+CONF_DEFAULT_ON_PRESS = "default_on_press"
+CONF_DEFAULT_ON_RELEASE = "default_on_release"
+CONF_DEFAULT_ON_SWIPE_LEFT = "default_on_swipe_left"
+CONF_DEFAULT_ON_SWIPE_RIGHT = "default_on_swipe_right"
+CONF_DEFAULT_ON_MULTI_TOUCH_RELEASE = "default_on_multi_touch_release"
+CONF_DEFAULT_ON_LONG_TOUCH_RELEASE = "default_on_long_touch_release"
+CONF_DEFAULT_ON_CUSTOM_CLICK = "default_on_custom_click"
+CONF_DEFAULT_ON_CUSTOM_LONG_CLICK = "default_on_custom_long_click"
+
 tx_ultimate_easy_ns = cg.esphome_ns.namespace('tx_ultimate_easy')
 TouchPoint = tx_ultimate_easy_ns.struct("TouchPoint")
 
@@ -50,6 +61,17 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_ON_LONG_TOUCH_RELEASE): automation.validate_automation(single=True),
     cv.Optional(CONF_ON_CUSTOM_CLICK): automation.validate_automation(single=True),
     cv.Optional(CONF_ON_CUSTOM_LONG_CLICK): automation.validate_automation(single=True),
+
+    # Default duplicate events
+    cv.Optional(CONF_DEFAULT_ON_TOUCH_EVENT): automation.validate_automation(single=True),
+    cv.Optional(CONF_DEFAULT_ON_PRESS): automation.validate_automation(single=True),
+    cv.Optional(CONF_DEFAULT_ON_RELEASE): automation.validate_automation(single=True),
+    cv.Optional(CONF_DEFAULT_ON_SWIPE_LEFT): automation.validate_automation(single=True),
+    cv.Optional(CONF_DEFAULT_ON_SWIPE_RIGHT): automation.validate_automation(single=True),
+    cv.Optional(CONF_DEFAULT_ON_MULTI_TOUCH_RELEASE): automation.validate_automation(single=True),
+    cv.Optional(CONF_DEFAULT_ON_LONG_TOUCH_RELEASE): automation.validate_automation(single=True),
+    cv.Optional(CONF_DEFAULT_ON_CUSTOM_CLICK): automation.validate_automation(single=True),
+    cv.Optional(CONF_DEFAULT_ON_CUSTOM_LONG_CLICK): automation.validate_automation(single=True),
 
 }).extend(cv.COMPONENT_SCHEMA).extend(uart.UART_DEVICE_SCHEMA)
 
@@ -125,6 +147,70 @@ async def register_tx_ultimate_easy(var, config):
             var.get_trigger_custom_long_click(),
             [(TouchPoint, "touch")],
             config[CONF_ON_CUSTOM_LONG_CLICK],
+        )
+
+    # Default duplicate event automations
+    if CONF_DEFAULT_ON_TOUCH_EVENT in config:
+        await automation.build_automation(
+            var.get_trigger_default_touch_event(),
+            [(TouchPoint, "touch")],
+            config[CONF_DEFAULT_ON_TOUCH_EVENT],
+        )
+
+    if CONF_DEFAULT_ON_PRESS in config:
+        await automation.build_automation(
+            var.get_trigger_default_touch(),
+            [(TouchPoint, "touch")],
+            config[CONF_DEFAULT_ON_PRESS],
+        )
+
+    if CONF_DEFAULT_ON_RELEASE in config:
+        await automation.build_automation(
+            var.get_trigger_default_release(),
+            [(TouchPoint, "touch")],
+            config[CONF_DEFAULT_ON_RELEASE],
+        )
+
+    if CONF_DEFAULT_ON_SWIPE_LEFT in config:
+        await automation.build_automation(
+            var.get_trigger_default_swipe_left(),
+            [(TouchPoint, "touch")],
+            config[CONF_DEFAULT_ON_SWIPE_LEFT],
+        )
+
+    if CONF_DEFAULT_ON_SWIPE_RIGHT in config:
+        await automation.build_automation(
+            var.get_trigger_default_swipe_right(),
+            [(TouchPoint, "touch")],
+            config[CONF_DEFAULT_ON_SWIPE_RIGHT],
+        )
+
+    if CONF_DEFAULT_ON_MULTI_TOUCH_RELEASE in config:
+        await automation.build_automation(
+            var.get_trigger_default_multi_touch_release(),
+            [(TouchPoint, "touch")],
+            config[CONF_DEFAULT_ON_MULTI_TOUCH_RELEASE],
+        )
+
+    if CONF_DEFAULT_ON_LONG_TOUCH_RELEASE in config:
+        await automation.build_automation(
+            var.get_trigger_default_long_touch_release(),
+            [(TouchPoint, "touch")],
+            config[CONF_DEFAULT_ON_LONG_TOUCH_RELEASE],
+        )
+
+    if CONF_DEFAULT_ON_CUSTOM_CLICK in config:
+        await automation.build_automation(
+            var.get_trigger_default_custom_click(),
+            [(TouchPoint, "touch")],
+            config[CONF_DEFAULT_ON_CUSTOM_CLICK],
+        )
+
+    if CONF_DEFAULT_ON_CUSTOM_LONG_CLICK in config:
+        await automation.build_automation(
+            var.get_trigger_default_custom_long_click(),
+            [(TouchPoint, "touch")],
+            config[CONF_DEFAULT_ON_CUSTOM_LONG_CLICK],
         )
 
 

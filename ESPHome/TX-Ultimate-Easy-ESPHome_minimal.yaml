@@ -20,11 +20,11 @@ substitutions:
   # Configuration - Set these in your device YAML
   gang_count: '1'  # Number of buttons (1-4)
   model_format: 'EU'  # 'EU' or 'US' - affects swipe direction mapping
-  enable_led_feedback: 1  # Enable/disable LED feedback on touch events (1=true, 0=false)
   enable_haptic_feedback: 1  # Enable/disable haptic feedback on touch events (1=true, 0=false)
   haptic_duration: 15  # Haptic feedback duration in milliseconds (1-500)
   enable_media_player: 1  # Enable/disable media player functionality (1=true, 0=false)
   media_player_volume: 100  # Initial media player volume (0-100)
+  enable_click_relay: 1  # Enable default click to toggle relay (1=true, 0=false)
   
   # Version info
   version: '2024.12.1'
@@ -51,7 +51,6 @@ esphome:
             ESP_LOGI("minimal", "TX Ultimate Easy Minimal - Starting up");
             ESP_LOGI("minimal", "Gang count: ${gang_count}");
             ESP_LOGI("minimal", "Model format: ${model_format}");
-            ESP_LOGI("minimal", "LED feedback: ${enable_led_feedback}");
             ESP_LOGI("minimal", "Haptic feedback: ${enable_haptic_feedback}");
             ESP_LOGI("minimal", "Haptic duration: ${haptic_duration}ms");
             ESP_LOGI("minimal", "Media player: ${enable_media_player}");
@@ -334,125 +333,125 @@ tx_ultimate_easy:
   # Configure gang count from substitution
   gang_count: ${gang_count}
 
-  # Touch press event - default behavior (can be overridden in device YAML)
-  on_press:
+  # Default duplicate events
+  default_on_press:
     then:
       - lambda: |-
-          ESP_LOGI("minimal", "Touch pressed - Button: %d, Position: %d (default)", touch.button, touch.x);
-
-  # Touch release event - default behavior (can be overridden in device YAML)
-  on_release:
-    then:
-      - lambda: |-
-          ESP_LOGI("minimal", "Touch released - Button: %d, Position: %d (default)", touch.button, touch.x);
-
-  # Long touch release event - default behavior (can be overridden in device YAML)
-  on_long_touch_release:
-    then:
-      - lambda: |-
-          ESP_LOGI("minimal", "Hardware long touch released - Button: %d, Position: %d (default)", touch.button, touch.x);
-
-  # Custom click detection - default behavior (can be overridden in device YAML)
-  on_custom_click:
-    then:
-      - lambda: |-
-          ESP_LOGI("minimal", "Custom click detected - Button: %d, Position: %d (default)", touch.button, touch.x);
+          ESP_LOGI("minimal", "[DEFAULT] Touch pressed - Button: %d, Position: %d", touch.button, touch.x);
+      - homeassistant.event:
+          event: ${EVENT_NAME}
+          data: !lambda |-
+            return "{\"type\":\"default_on_press\",\"button\":" + std::to_string(touch.button) + 
+                   ",\"position\":" + std::to_string(touch.x) + 
+                   ",\"state\":\"" + touch.state_str + "\"}";
       - if:
           condition:
             lambda: |-
-              return ${enable_led_feedback};
+              return ${enable_haptic_feedback};
           then:
-            - light.turn_on:
-                id: light_full
-                red: 100%
-                green: 100%
-                blue: 100%
-                brightness: 50%
-            - delay: 100ms
-            - light.turn_off: light_full
+            - script.execute:
+                id: vibrate
+                duration: ${haptic_duration}
 
-  # Custom long click detection - default behavior (can be overridden in device YAML)
-  on_custom_long_click:
+  default_on_release:
     then:
       - lambda: |-
-          ESP_LOGI("minimal", "Custom long click detected - Button: %d, Position: %d (default)", touch.button, touch.x);
-      - if:
-          condition:
-            lambda: |-
-              return ${enable_led_feedback};
-          then:
-            - light.turn_on:
-                id: light_full
-                red: 100%
-                green: 65%
-                blue: 0%
-                brightness: 50%
-            - delay: 300ms
-            - light.turn_off: light_full
+          ESP_LOGI("minimal", "[DEFAULT] Touch released - Button: %d, Position: %d", touch.button, touch.x);
+      - homeassistant.event:
+          event: ${EVENT_NAME}
+          data: !lambda |-
+            return "{\"type\":\"default_on_release\",\"button\":" + std::to_string(touch.button) + 
+                   ",\"position\":" + std::to_string(touch.x) + 
+                   ",\"state\":\"" + touch.state_str + "\"}";
 
-  # Swipe left event - default behavior (can be overridden in device YAML)
-  on_swipe_left:
+  default_on_long_touch_release:
     then:
       - lambda: |-
-          ESP_LOGI("minimal", "Swipe left detected - Position: %d (default)", touch.x);
-      - if:
-          condition:
-            lambda: |-
-              return ${ enable_led_feedback};
-          then:
-            - light.turn_on:
-                id: light_full
-                red: 0%
-                green: 100%
-                blue: 100%
-                brightness: 50%
-            - delay: 150ms
-            - light.turn_off: light_full
+          ESP_LOGI("minimal", "[DEFAULT] Hardware long touch released - Button: %d, Position: %d", touch.button, touch.x);
+      - homeassistant.event:
+          event: ${EVENT_NAME}
+          data: !lambda |-
+            return "{\"type\":\"default_on_long_touch_release\",\"button\":" + std::to_string(touch.button) + 
+                   ",\"position\":" + std::to_string(touch.x) + 
+                   ",\"state\":\"" + touch.state_str + "\"}";
 
-  # Swipe right event - default behavior (can be overridden in device YAML)
-  on_swipe_right:
+  default_on_custom_click:
     then:
       - lambda: |-
-          ESP_LOGI("minimal", "Swipe right detected - Position: %d (default)", touch.x);
-      - if:
-          condition:
-            lambda: |-
-              return ${enable_led_feedback};
-          then:
-            - light.turn_on:
-                id: light_full
-                red: 100%
-                green: 0%
-                blue: 100%
-                brightness: 50%
-            - delay: 150ms
-            - light.turn_off: light_full
+          ESP_LOGI("minimal", "[DEFAULT] Custom click detected - Button: %d, Position: %d", touch.button, touch.x);
+      - homeassistant.event:
+          event: ${EVENT_NAME}
+          data: !lambda |-
+            return "{\"type\":\"default_on_custom_click\",\"button\":" + std::to_string(touch.button) + 
+                   ",\"position\":" + std::to_string(touch.x) + 
+                   ",\"state\":\"" + touch.state_str + "\"}";
+      - lambda: |-
+          if (${enable_click_relay}) {
+            switch (touch.button) {
+              case 1: id(output_relay_1)->toggle(); break;
+              case 2: id(output_relay_2)->toggle(); break;
+              case 3: id(output_relay_3)->toggle(); break;
+              case 4: id(output_relay_4)->toggle(); break;
+              default: break;
+            }
+          }
 
-  # Multi-touch event - default behavior (can be overridden in device YAML)
-  on_multi_touch_release:
+  default_on_custom_long_click:
     then:
       - lambda: |-
-          ESP_LOGI("minimal", "Multi-touch released - Position: %d (default)", touch.x);
-      - if:
-          condition:
-            lambda: |-
-              return ${enable_led_feedback};
-          then:
-            - light.turn_on:
-                id: light_full
-                red: 50%
-                green: 0%
-                blue: 50%
-                brightness: 50%
-            - delay: 200ms
-            - light.turn_off: light_full
+          ESP_LOGI("minimal", "[DEFAULT] Custom long click detected - Button: %d, Position: %d", touch.button, touch.x);
+      - homeassistant.event:
+          event: ${EVENT_NAME}
+          data: !lambda |-
+            return "{\"type\":\"default_on_custom_long_click\",\"button\":" + std::to_string(touch.button) + 
+                   ",\"position\":" + std::to_string(touch.x) + 
+                   ",\"state\":\"" + touch.state_str + "\"}";
+
+  default_on_swipe_left:
+    then:
+      - lambda: |-
+          ESP_LOGI("minimal", "[DEFAULT] Swipe left detected - Position: %d", touch.x);
+      - homeassistant.event:
+          event: ${EVENT_NAME}
+          data: !lambda |-
+            return "{\"type\":\"default_on_swipe_left\",\"button\":" + std::to_string(touch.button) + 
+                   ",\"position\":" + std::to_string(touch.x) + 
+                   ",\"state\":\"" + touch.state_str + "\"}";
+
+  default_on_swipe_right:
+    then:
+      - lambda: |-
+          ESP_LOGI("minimal", "[DEFAULT] Swipe right detected - Position: %d", touch.x);
+      - homeassistant.event:
+          event: ${EVENT_NAME}
+          data: !lambda |-
+            return "{\"type\":\"default_on_swipe_right\",\"button\":" + std::to_string(touch.button) + 
+                   ",\"position\":" + std::to_string(touch.x) + 
+                   ",\"state\":\"" + touch.state_str + "\"}";
+
+  default_on_multi_touch_release:
+    then:
+      - lambda: |-
+          ESP_LOGI("minimal", "[DEFAULT] Multi-touch released - Position: %d", touch.x);
+      - homeassistant.event:
+          event: ${EVENT_NAME}
+          data: !lambda |-
+            return "{\"type\":\"default_on_multi_touch_release\",\"button\":" + std::to_string(touch.button) + 
+                   ",\"position\":" + std::to_string(touch.x) + 
+                   ",\"state\":\"" + touch.state_str + "\"}";
 
   # Generic touch event - fires for all touch events (for debugging)
-  on_touch_event:
+  default_on_touch_event:
     then:
       - lambda: |-
-          ESP_LOGD("minimal", "Touch event - State: %s, Button: %d, Position: %d", 
+          ESP_LOGD("minimal", "[DEFAULT] Touch event - State: %s, Button: %d, Position: %d", 
                    touch.state_str.c_str(), touch.button, touch.x);
+      - homeassistant.event:
+          event: ${EVENT_NAME}
+          data: !lambda |-
+            return "{\"type\":\"default_on_touch_event\",\"button\":" + std::to_string(touch.button) + 
+                   ",\"position\":" + std::to_string(touch.x) + 
+                   ",\"state\":\"" + touch.state_str + "\"}";
 
 # Boot sequence is now handled in the main esphome section above
 

@@ -48,6 +48,17 @@ namespace esphome {
             Trigger<TouchPoint> *get_trigger_multi_touch_release() { return &this->trigger_multi_touch_release_; }
             Trigger<TouchPoint> *get_trigger_long_touch_release() { return &this->trigger_long_touch_release_; }
             
+            // Default duplicate events
+            Trigger<TouchPoint> *get_trigger_default_touch_event() { return &this->trigger_default_touch_event_; }
+            Trigger<TouchPoint> *get_trigger_default_touch() { return &this->trigger_default_touch_; }
+            Trigger<TouchPoint> *get_trigger_default_release() { return &this->trigger_default_release_; }
+            Trigger<TouchPoint> *get_trigger_default_swipe_left() { return &this->trigger_default_swipe_left_; }
+            Trigger<TouchPoint> *get_trigger_default_swipe_right() { return &this->trigger_default_swipe_right_; }
+            Trigger<TouchPoint> *get_trigger_default_multi_touch_release() { return &this->trigger_default_multi_touch_release_; }
+            Trigger<TouchPoint> *get_trigger_default_long_touch_release() { return &this->trigger_default_long_touch_release_; }
+            Trigger<TouchPoint> *get_trigger_default_custom_click() { return &this->trigger_default_custom_click_; }
+            Trigger<TouchPoint> *get_trigger_default_custom_long_click() { return &this->trigger_default_custom_long_click_; }
+            
             // Custom touch detection triggers
             Trigger<TouchPoint> *get_trigger_custom_click() { return &this->trigger_custom_click_; }
             Trigger<TouchPoint> *get_trigger_custom_long_click() { return &this->trigger_custom_long_click_; }
@@ -82,6 +93,17 @@ namespace esphome {
             Trigger<TouchPoint> trigger_swipe_right_;
             Trigger<TouchPoint> trigger_multi_touch_release_;
             Trigger<TouchPoint> trigger_long_touch_release_;
+            
+            // Default duplicate events
+            Trigger<TouchPoint> trigger_default_touch_event_;
+            Trigger<TouchPoint> trigger_default_touch_;
+            Trigger<TouchPoint> trigger_default_release_;
+            Trigger<TouchPoint> trigger_default_swipe_left_;
+            Trigger<TouchPoint> trigger_default_swipe_right_;
+            Trigger<TouchPoint> trigger_default_multi_touch_release_;
+            Trigger<TouchPoint> trigger_default_long_touch_release_;
+            Trigger<TouchPoint> trigger_default_custom_click_;
+            Trigger<TouchPoint> trigger_default_custom_long_click_;
             
             // Custom touch detection
             Trigger<TouchPoint> trigger_custom_click_;
