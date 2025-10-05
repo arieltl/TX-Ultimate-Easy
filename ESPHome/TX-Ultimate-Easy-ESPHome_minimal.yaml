@@ -340,10 +340,11 @@ tx_ultimate_easy:
           ESP_LOGI("minimal", "[DEFAULT] Touch pressed - Button: %d, Position: %d", touch.button, touch.x);
       - homeassistant.event:
           event: ${EVENT_NAME}
-          data: !lambda |-
-            return "{\"type\":\"default_on_press\",\"button\":" + std::to_string(touch.button) + 
-                   ",\"position\":" + std::to_string(touch.x) + 
-                   ",\"state\":\"" + touch.state_str + "\"}";
+          data:
+            type: default_on_press
+            button: !lambda return touch.button;
+            position: !lambda return touch.x;
+            state: !lambda return touch.state_str;
       - if:
           condition:
             lambda: |-
@@ -359,10 +360,11 @@ tx_ultimate_easy:
           ESP_LOGI("minimal", "[DEFAULT] Touch released - Button: %d, Position: %d", touch.button, touch.x);
       - homeassistant.event:
           event: ${EVENT_NAME}
-          data: !lambda |-
-            return "{\"type\":\"default_on_release\",\"button\":" + std::to_string(touch.button) + 
-                   ",\"position\":" + std::to_string(touch.x) + 
-                   ",\"state\":\"" + touch.state_str + "\"}";
+          data:
+            type: default_on_release
+            button: !lambda return touch.button;
+            position: !lambda return touch.x;
+            state: !lambda return touch.state_str;
 
   default_on_long_touch_release:
     then:
@@ -370,10 +372,11 @@ tx_ultimate_easy:
           ESP_LOGI("minimal", "[DEFAULT] Hardware long touch released - Button: %d, Position: %d", touch.button, touch.x);
       - homeassistant.event:
           event: ${EVENT_NAME}
-          data: !lambda |-
-            return "{\"type\":\"default_on_long_touch_release\",\"button\":" + std::to_string(touch.button) + 
-                   ",\"position\":" + std::to_string(touch.x) + 
-                   ",\"state\":\"" + touch.state_str + "\"}";
+          data:
+            type: default_on_long_touch_release
+            button: !lambda return touch.button;
+            position: !lambda return touch.x;
+            state: !lambda return touch.state_str;
 
   default_on_custom_click:
     then:
@@ -381,10 +384,11 @@ tx_ultimate_easy:
           ESP_LOGI("minimal", "[DEFAULT] Custom click detected - Button: %d, Position: %d", touch.button, touch.x);
       - homeassistant.event:
           event: ${EVENT_NAME}
-          data: !lambda |-
-            return "{\"type\":\"default_on_custom_click\",\"button\":" + std::to_string(touch.button) + 
-                   ",\"position\":" + std::to_string(touch.x) + 
-                   ",\"state\":\"" + touch.state_str + "\"}";
+          data:
+            type: default_on_custom_click
+            button: !lambda return touch.button;
+            position: !lambda return touch.x;
+            state: !lambda return touch.state_str;
       - lambda: |-
           if (${enable_click_relay}) {
             switch (touch.button) {
@@ -402,10 +406,11 @@ tx_ultimate_easy:
           ESP_LOGI("minimal", "[DEFAULT] Custom long click detected - Button: %d, Position: %d", touch.button, touch.x);
       - homeassistant.event:
           event: ${EVENT_NAME}
-          data: !lambda |-
-            return "{\"type\":\"default_on_custom_long_click\",\"button\":" + std::to_string(touch.button) + 
-                   ",\"position\":" + std::to_string(touch.x) + 
-                   ",\"state\":\"" + touch.state_str + "\"}";
+          data:
+            type: default_on_custom_long_click
+            button: !lambda return touch.button;
+            position: !lambda return touch.x;
+            state: !lambda return touch.state_str;
 
   default_on_swipe_left:
     then:
@@ -413,10 +418,11 @@ tx_ultimate_easy:
           ESP_LOGI("minimal", "[DEFAULT] Swipe left detected - Position: %d", touch.x);
       - homeassistant.event:
           event: ${EVENT_NAME}
-          data: !lambda |-
-            return "{\"type\":\"default_on_swipe_left\",\"button\":" + std::to_string(touch.button) + 
-                   ",\"position\":" + std::to_string(touch.x) + 
-                   ",\"state\":\"" + touch.state_str + "\"}";
+          data:
+            type: default_on_swipe_left
+            button: !lambda return touch.button;
+            position: !lambda return touch.x;
+            state: !lambda return touch.state_str;
 
   default_on_swipe_right:
     then:
@@ -424,10 +430,11 @@ tx_ultimate_easy:
           ESP_LOGI("minimal", "[DEFAULT] Swipe right detected - Position: %d", touch.x);
       - homeassistant.event:
           event: ${EVENT_NAME}
-          data: !lambda |-
-            return "{\"type\":\"default_on_swipe_right\",\"button\":" + std::to_string(touch.button) + 
-                   ",\"position\":" + std::to_string(touch.x) + 
-                   ",\"state\":\"" + touch.state_str + "\"}";
+          data:
+            type: default_on_swipe_right
+            button: !lambda return touch.button;
+            position: !lambda return touch.x;
+            state: !lambda return touch.state_str;
 
   default_on_multi_touch_release:
     then:
@@ -435,10 +442,11 @@ tx_ultimate_easy:
           ESP_LOGI("minimal", "[DEFAULT] Multi-touch released - Position: %d", touch.x);
       - homeassistant.event:
           event: ${EVENT_NAME}
-          data: !lambda |-
-            return "{\"type\":\"default_on_multi_touch_release\",\"button\":" + std::to_string(touch.button) + 
-                   ",\"position\":" + std::to_string(touch.x) + 
-                   ",\"state\":\"" + touch.state_str + "\"}";
+          data:
+            type: default_on_multi_touch_release
+            button: !lambda return touch.button;
+            position: !lambda return touch.x;
+            state: !lambda return touch.state_str;
 
   # Generic touch event - fires for all touch events (for debugging)
   default_on_touch_event:
@@ -448,10 +456,11 @@ tx_ultimate_easy:
                    touch.state_str.c_str(), touch.button, touch.x);
       - homeassistant.event:
           event: ${EVENT_NAME}
-          data: !lambda |-
-            return "{\"type\":\"default_on_touch_event\",\"button\":" + std::to_string(touch.button) + 
-                   ",\"position\":" + std::to_string(touch.x) + 
-                   ",\"state\":\"" + touch.state_str + "\"}";
+          data:
+            type: default_on_touch_event
+            button: !lambda return touch.button;
+            position: !lambda return touch.x;
+            state: !lambda return touch.state_str;
 
 # Boot sequence is now handled in the main esphome section above
 
