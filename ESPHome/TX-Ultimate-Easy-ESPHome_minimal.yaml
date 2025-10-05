@@ -25,7 +25,6 @@ substitutions:
   enable_media_player: 1  # Enable/disable media player functionality (1=true, 0=false)
   media_player_volume: 100  # Initial media player volume (0-100)
   enable_click_relay: 1  # Enable default click to toggle relay (1=true, 0=false)
-  custom_long_click_threshold: 500  # Custom long click threshold in milliseconds (100-5000)
   
   # Version info
   version: '2024.12.1'
@@ -329,7 +328,7 @@ script:
 tx_ultimate_easy:
   id: tx_ultimate
   uart: uart_touch
-  custom_long_click_threshold: ${custom_long_click_threshold}
+  custom_long_click_threshold: 300  # 300ms for faster long click detection
   
   # Configure gang count from substitution
   gang_count: ${gang_count}
